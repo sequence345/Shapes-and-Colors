@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #container {
+      text-align: center;
+    }
+
+    #polygon {
+      width: 200px;
+      height: 200px;
+      margin: 20px auto;
+    }
+
+    button {
+      margin: 10px;
+    }
+
+    input[type=range] {
+      width: 80%;
+      margin: 10px auto;
+    }
+
+    .label {
+      font-family: Arial;
+      font-weight: bold; /* Make the text bold */
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <svg id="polygon" viewBox="0 0 100 100">
+      <polygon points="50,10 10,90 90,90" fill="#000000" stroke="#000000" stroke-width="1"/>
+    </svg>
+    <button id="add">+</button>
+    <button id="remove">-</button>
+    <button id="togglePoints">Toggle Points</button>
+    Red: <input type="range" id="red" min="0" max="255" value="0">
+    Green: <input type="range" id="green" min="0" max="255" value="0">
+    Blue: <input type="range" id="blue" min="0" max="255" value="0">
+    Size: <input type="range" id="scale" min="1" max="10" value="1" step="0.01">
+  </div>
+
+  <script>
+    var points = [50, 10, 10, 90, 90, 90]; // Initial triangle points
+    var sides = 3; // Initial number of sides
+    var showPoints = false;
+
+    document.getElementById('add').addEventListener('click', function() {
+      sides++;
+      updatePolygon();
+    });
+
+    document.getElementById('remove').addEventListener('click', function() {
+      if (sides > 3) {
+        sides--;
+        updatePolygon();
+      }
+    });
+
+    document.getElementById('togglePoints').addEventListener('click', function() {
+      showPoints = !showPoints;
+      updatePolygon();
+    });
+
+    document.getElementById('scale').addEventListener('input', function() {
+      updatePolygon();
+    });
+
+    document.querySelectorAll('input[type=range]').forEach(function(input) {
+      input.addEventListener('input', function() {
+        updateColor();
+      });
+    });
+
+    function clearPoints() {
+      var points = document.querySelectorAll('.point, .label');
+      points.forEach(function(point) {
+        point.remove();
+      });
+    }
+
+    function updatePolygon() {
+      clearPoints();
+      points = [];
+      var scale = document.getElementById('scale').value;
+      for (var i = 0; i < sides; i++) {
+        var angle = 2 * Math.PI / sides * i;
+        var x = 50 + 40 * Math.sin(angle);
+        var y = 50 + 40 * Math.cos(angle);
+        points.push(x, y);
+
+        if (showPoints) {
+          // Add a circle at each point
+          var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', x);
+          circle.setAttribute('cy', y);
+          circle.setAttribute('r', scale);
+          circle.setAttribute('fill', 'black');
+          circle.classList.add('point');
+          document.getElementById('polygon').appendChild(circle);
+
+          // Add a label at each point
+          var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          label.setAttribute('x', x);
+          label.setAttribute('y', y + scale / 2); // Adjusted to center the text in the circle
+          label.setAttribute('font-size', scale * 1.5); // Adjusted to fit the text in the circle
+          label.setAttribute('text-anchor', 'middle');
+          label.setAttribute('fill', 'white');
+          label.textContent = i + 1;
+          label.classList.add('label');
+          document.getElementById('polygon').appendChild(label);
+        }
+      }
+      var polygon = document.querySelector('#polygon polygon');
+      polygon.setAttribute('points', points.join(','));
+      polygon.style.strokeWidth = scale;
+    }
+
+    function updateColor() {
+      var r = document.getElementById('red').value;
+      var g = document.getElementById('green').value;
+      var b = document.getElementById('blue').value;
+      var color = 'rgb(' + r + ',' + g + ',' + b + ')';
+      document.querySelector('#polygon polygon').style.fill = color;
+    }
+  </script>
+</body>
+</html>
